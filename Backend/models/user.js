@@ -11,14 +11,14 @@ const userSchema = mongoose.Schema({
         require: true
     },
 
-    emial: {
+    email: {
         type: String,
-        require: true
+        require: true,
+        unique: true
     },
 
     profPic: {
         type: String,
-        require: true,
         default: "https://cdn-icons-png.flaticon.com/512/149/149071.png"
     }
 },
