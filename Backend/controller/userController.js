@@ -21,7 +21,7 @@ const userController = {
             userName: userName,
             email: email,
             password: hashedpassword,
-            proFpic: profPic
+            profPic: profPic
         });
 
         const createUser = await newUser.save();
@@ -50,8 +50,20 @@ const userController = {
         }
 
         if(user && validPassword){
-            res.status(200).json({user: user});
+            res.status(200).json({user: user, token: generateToken(user._id)});
         }
+    },
+
+    searchUsers: async (req, res) => {
+        const keywords = req.query.search ? {
+            $or: [
+                {userName: {$regex: req.query.search, $options: "i" }},
+                { email: { $regex: req.query.search, $options: "i" } }
+            ]
+        } : {};
+
+        const users = await User.find(keywords).find({ _id: { $ne: req.user._id } });
+        res.send(users);
     }
 }
 

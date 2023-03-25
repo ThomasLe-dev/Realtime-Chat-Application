@@ -20,6 +20,12 @@ const userSchema = mongoose.Schema({
     profPic: {
         type: String,
         default: "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+    },
+
+    isAdmin: {
+        type: Boolean,
+        required: true,
+        default: false,
     }
 },
     {
