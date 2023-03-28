@@ -13,7 +13,9 @@ const protect = async (req, res, next) => {
 
         //The select() method is used to exclude the password field from the document, 
         //which is not necessary for further processing and should not be leaked to clients.
+        //define the current user that will send the request
         req.user = await User.findById(decoded.id).select('-password');
+
         next();
     }catch(err){
         res.status(401);
