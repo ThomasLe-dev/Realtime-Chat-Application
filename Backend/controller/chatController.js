@@ -23,7 +23,7 @@ const chatController = {
 
         if (!chat) {
             const chatData = {
-                chatName: "sender",
+                chatName: req.user.userName,
                 isGroupChat: false,
                 users: [req.user.id, userId],
             };
@@ -97,6 +97,71 @@ const chatController = {
         } catch (error) {
             res.status(400);
             throw new Error(error.message);
+        }
+    },
+
+    renameGroupChat: async(req,res) => {
+        const {chatID, newName} = req.body;
+
+        if(!chatID || !newName) {
+            return res.status(404).json({message: "The request does not send the chat ID or the new name."});
+        }
+
+        try {
+            const groupChat = await Chat.findOneAndUpdate(
+                {_id: chatID, isGroupChat: true},
+                {chatName: newName},
+                {new: true}
+            )        
+            .populate({path: 'users', select: '-password',})
+            .populate({path: 'groupAdmin', select: '-password',});
+
+            if(!groupChat){
+                return res.status(404).json({message: "Group chat not found"})
+            }
+
+            res.status(200).json(groupChat);
+        } catch (error) {
+            res.status(400).send({ error: error.message });
+        }
+    },
+
+    addUsertoGroupChat: async(req,res) => {
+        const { chatId, userId } = req.body;
+
+        try {
+          const addUser = await Chat.findByIdAndUpdate(
+            chatId,
+            { $push: { users: userId } },
+            { new: true }
+          ).populate("users", "-password").populate("groupAdmin", "-password");
+      
+          if (!addUser) {
+            throw new Error("Chat Not Found");
+          }
+      
+          res.status(200).json(addUser);
+        } catch (error) {
+          res.status(404).json({ error: error.message });
+        }
+    },
+
+    removeFromGroup: async(req,res) => {
+        const {chatId, userId} = req.body;
+
+        try {
+            const removeUser = await Chat.findByIdAndUpdate(
+                chatId,
+                { $pull: {users: userId}},
+                {new: true}
+            ).populate("users", "-password").populate("groupAdmin", "-password");
+
+            if(!removeUser){
+                throw new Error("Chat not found");
+            }
+            res.status(200).json(removeUser)
+        } catch (error) {
+            res.status(404).json({ error: error.message });
         }
     },
 
