@@ -50,18 +50,20 @@ const userController = {
         }
 
         if(user && validPassword){
-            res.status(200).json({user: user, token: generateToken(user._id)});
+            //remove the password from the authenticated user
+            const userWithoutPassword = {
+                ...user._doc,
+                password: undefined
+            };
+            res.status(200).json({ userWithoutPassword, token: generateToken(user._id) });
         }
     },
 
     searchUsers: async (req, res) => {
         const keywords = req.query.search ? {
-            $or: [
-                {userName: {$regex: req.query.search, $options: "i" }},
-                { email: { $regex: req.query.search, $options: "i" } }
-            ]
+            userName: { $regex: req.query.search, $options: "i" }
         } : {};
-
+    
         const users = await User.find(keywords).find({ _id: { $ne: req.user._id } });
         res.send(users);
     }
