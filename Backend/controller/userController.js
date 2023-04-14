@@ -27,7 +27,7 @@ const userController = {
         const createUser = await newUser.save();
         if(createUser){
             res.status(201).json({
-                message: 'Created new user successfully',
+                message: 'Create new user successfully',
                 user: createUser,
                 token: generateToken(createUser._id)
             });
@@ -50,7 +50,7 @@ const userController = {
         }
 
         if(user && validPassword){
-            //remove the password from the authenticated user
+            //remove password from the authenticated user
             const userWithoutPassword = {
                 ...user._doc,
                 password: undefined

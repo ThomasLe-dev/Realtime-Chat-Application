@@ -1,29 +1,36 @@
 const Chat = require('../models/Chat');
-// const User = require('../models/User');
+const User = require('../models/User');
 
 const chatController = {
-    accessChat: async (req,res) => {
-        const {userId} = req.body;
-
-        if(!userId) {
+    accessChat: async (req, res) => {
+        const { userId } = req.body;
+    
+        if (!userId) {
             return res.status(400).json({
                 message: 'The request did not send the User ID'
-            })
+            });
         }
-
+    
         let chat = await Chat.findOne({
             isGroupChat: false,
-            users: {$all: [req.user.id, userId]}
+            users: { $all: [req.user.id, userId] }
         })
-        .populate({
-            path: "users",
-            select: "-password"
-        })
-        .populate("latestMsg.sender", "userName email profPic");
-
+            .populate({
+                path: "users",
+                select: "-password"
+            })
+            .populate("latestMsg.sender", "userName email profPic");
+    
         if (!chat) {
+            const user = await User.findById(userId); // Fetch user data from userId
+            if (!user) {
+                return res.status(400).json({
+                    message: 'User not found'
+                });
+            }
+    
             const chatData = {
-                chatName: req.user.userName,
+                chatName: user.userName, // Use sender's name as chat name
                 isGroupChat: false,
                 users: [req.user.id, userId],
             };
@@ -33,10 +40,10 @@ const chatController = {
                 select: "-password"
             });
         }
-
+    
         res.status(200).json(chat);
-        
     },
+    
 
     //return all chats of a user
     fetchChats: async (req, res) => {
