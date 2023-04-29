@@ -37,7 +37,7 @@ const server = app.listen(process.env.PORT, () => {
 })
 
 const io = require('socket.io')(server, {
-  pingTimeout: 60000,
+  pingTimeout: 120000,
   cors: {
     origin: 'http://localhost:3000'
   }
@@ -70,5 +70,10 @@ io.on('connection', (socket) => {
 
       socket.in(user._id).emit('message received', newMessageReceived)
     });
+  });
+
+  socket.off("setup", () => {
+    console.log("USER DISCONNECTED");
+    socket.leave(userData._id);
   });
 });

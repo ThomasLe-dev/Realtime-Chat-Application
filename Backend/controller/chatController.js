@@ -19,7 +19,13 @@ const chatController = {
                 path: "users",
                 select: "-password"
             })
-            .populate("latestMsg.sender", "userName email profPic");
+            .populate({
+                path: "latestMsg",
+                populate: {
+                    path: "sender",
+                    select: "userName email profPic"
+                }
+            });
     
         if (!chat) {
             const user = await User.findById(userId); // Fetch user data from userId
@@ -40,7 +46,6 @@ const chatController = {
                 select: "-password"
             });
         }
-    
         res.status(200).json(chat);
     },
     
@@ -60,8 +65,11 @@ const chatController = {
                 .populate("latestMsg")
                 .sort({updatedAt: -1})
                 .populate({
-                    path: "latestMsg.sender",
-                    select: "userName profPic email"
+                    path: "latestMsg",
+                    populate: {
+                        path: "sender",
+                        select: "userName email profPic"
+                    }
                 });
     
             res.status(200).send(chats);
